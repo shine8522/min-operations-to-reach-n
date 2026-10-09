@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>minOperation(n): line by line</title>
+<style>
+:root{--bg:#eef0f7;--fg:#171b30;--mut:#5b6280;--card:#fff;--line:#cdd2e6;--od:#2563eb;--ev:#c026d3;--hl:#d97706;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0b0e1c;--fg:#e9ecfa;--mut:#9aa2c4;--card:#161c3a;--line:#2b335c;--od:#7cc4ff;--ev:#ff8fe0;--hl:#ffd166}}
+:root[data-theme="dark"]{--bg:#0b0e1c;--fg:#e9ecfa;--mut:#9aa2c4;--card:#161c3a;--line:#2b335c;--od:#7cc4ff;--ev:#ff8fe0;--hl:#ffd166}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--bg);color:var(--fg);font-family:"Trebuchet MS","Segoe UI",system-ui,sans-serif;padding:16px 12px 40px;line-height:1.45}
+main{max-width:560px;margin:0 auto;display:flex;flex-direction:column;gap:12px}
+h1{font-size:22px;margin:0}
+.sub{color:var(--mut);font-size:14px;margin:2px 0 0}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:12px 14px}
+.ctl{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.ctl label{font-size:14px;color:var(--mut)}
+button,input,select{font:inherit;color:var(--fg);background:var(--card);border:1px solid var(--line);border-radius:10px;padding:7px 12px}
+button{cursor:pointer}input{width:84px}
+button:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid var(--hl);outline-offset:2px}
+.bar{height:6px;background:var(--line);border-radius:6px;overflow:hidden}.bar i{display:block;height:100%;width:0;background:var(--hl);transition:width .4s}
+.code{background:#12172f;color:#e9ecfa;border-radius:16px;padding:8px 0;font-family:ui-monospace,Consolas,Menlo,monospace;font-size:14px;overflow-x:auto}
+.ln{display:flex;white-space:pre;padding:2px 12px 2px 0;border-left:4px solid transparent;transition:background .3s}
+.ln b{width:34px;text-align:right;padding-right:12px;color:#6c78c0;font-weight:400;flex:none}
+.ln.on{background:#2a3470;border-left-color:#ffd166}
+.why{border-left:5px solid var(--hl)}
+.why h2{margin:0 0 4px;font-size:17px}.why p{margin:0;font-size:16px}
+.vars{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.v{text-align:center}.v small{display:block;color:var(--mut);font-size:13px}
+.v span{display:inline-block;font-size:44px;font-weight:800;line-height:1.1;font-family:ui-monospace,Consolas,monospace}
+.chips{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
+.chip{flex:1;text-align:center;padding:7px 8px;border-radius:12px;border:2px solid var(--line);font-size:14px;font-weight:700;opacity:.5;transition:.3s}
+.chip.od.act{opacity:1;border-color:var(--od);color:var(--od)}.chip.ev.act{opacity:1;border-color:var(--ev);color:var(--ev)}
+.chain{display:flex;flex-wrap:wrap;gap:6px;align-items:center;min-height:44px}
+.nd{min-width:38px;text-align:center;padding:6px 8px;border-radius:50%;border:2px solid var(--line);font-weight:800}
+.nd.cur{border-color:var(--hl);box-shadow:0 0 12px var(--hl)}
+.op{font-size:12px;font-weight:700}.op.od{color:var(--od)}.op.ev{color:var(--ev)}
+.new{animation:pop .5s}
+.pop{animation:pop .5s}
+@keyframes pop{0%{transform:scale(.6);opacity:.3}60%{transform:scale(1.2)}100%{transform:none;opacity:1}}
+.ans{display:none;border:2px solid #16a34a;text-align:center}
+.ans.show{display:block;animation:pop .6s}
+.ans strong{font-size:20px}
+.sheet h2{margin:0 0 6px;font-size:18px}
+.sheet ul{margin:0;padding-left:18px}.sheet li{margin:5px 0;font-size:15px}
+code{font-family:ui-monospace,Consolas,monospace;background:var(--line);padding:1px 5px;border-radius:5px;font-size:13px}
+@media (prefers-reduced-motion:reduce){*{animation-duration:.01s!important;transition-duration:.01s!important}}
+</style>
+</head>
+<body>
+<main>
+  <div><h1>minOperation(n): ek ek line ka safar</h1>
+  <p class="sub">0 se n tak minimum steps (double ya +1). Hum n se 0 tak ulta chalte hain.</p></div>
+  <div class="card ctl">
+    <label for="n">n =</label><input id="n" type="number" min="0" max="1023" value="7">
+    <button id="rs">Run</button><button id="pv" aria-label="Previous step">◀</button><button id="pl">Pause</button><button id="nx" aria-label="Next step">▶</button>
+    <label for="sp">Speed</label><select id="sp"><option value="3800">Slow</option><option value="2600" selected>Normal</option><option value="1300">Fast</option></select>
+  </div>
+  <div class="bar" aria-hidden="true"><i id="pg"></i></div>
+  <div class="code" id="code" aria-label="Code"></div>
+  <div class="card why" aria-live="polite"><h2 id="wh"></h2><p id="wb"></p></div>
+  <div class="card">
+    <div class="vars"><div class="v"><small>n</small><span id="vn">-</span></div><div class="v"><small>count</small><span id="vc">-</span></div></div>
+    <div class="chips"><div class="chip od" id="co">odd → n − 1</div><div class="chip ev" id="ce">even → n ÷ 2</div></div>
+  </div>
+  <div class="card"><small style="color:var(--mut)">n ka safar (ulta raasta)</small><div class="chain" id="ch"></div></div>
+  <div class="card ans" id="an"><strong id="at"></strong><p id="ap" style="margin:6px 0 0"></p></div>
+  <div class="card sheet">
+    <h2>Interview cheat-sheet</h2>
+    <ul>
+      <li><b>Idea (30 sec):</b> forward tree ki jagah n se peeche. Odd pe <code>−1</code> (double se odd nahi banta), even pe <code>÷2</code> (do +1 ki jagah ek double).</li>
+      <li><b>Time O(log n), space O(1):</b> odd ke baad n even ho jaata hai aur even pe aadha, toh bahut kam iterations.</li>
+      <li><b>Shortcut:</b> <code>floor(log2 n) + popcount(n)</code>. n=7: 2+3 = 5. n=8: 3+1 = 4. n=15: 3+4 = 7.</li>
+      <li><b>Edge cases:</b> n=0 → 0 (loop chalta hi nahi). n=1 → 1 (odd, 1 → 0).</li>
+      <li><b>Even pe −1 kyun nahi?</b> 6 pe −1,−1 → 4 (2 steps), ÷2 → 3 (1 step). Half ek step mein zyada neeche le jaata hai.</li>
+      <li><b>Bolna kya hai:</b> "Last operation +1 thi ya double? Odd hai toh +1. Even hai toh double lena better hai. Isliye reverse mein greedy chalta hai."</li>
+    </ul>
+  </div>
+</main>
+<script>
+const $=i=>document.getElementById(i);
+const CODE=['int minOperation(int n) {','    int count = 0;','    while (n &gt; 0) {','        if (n % 2 == 0) {','            n = n / 2;','        } else {','            n = n - 1;','        }','        count++;','    }','    return count;','}'];
+$("code").innerHTML=CODE.map((t,i)=>`<div class="ln" id="l${i}"><b>${i+1}</b>${t}</div>`).join('');
+function build(n0){
+  let n=n0,c=0,H=[{v:n0,op:''}],S=[];
+  const P=(l,h,b,rule)=>S.push({l,h,b,rule,n,c:l===0?null:c,H:H.slice()});
+  P(0,'Function shuru',`Input n = ${n}. Seedha 0 se n tak jaane ki jagah hum n se 0 tak ulta chalenge.`);
+  P(1,'Counter banaya','count = 0, abhi tak 0 operations. Har step pe ye +1 hoga.');
+  while(n>0){
+    P(2,'Loop check',`n > 0 ?  ${n} > 0 → haan, andar jao.`);
+    if(n%2===0){
+      P(3,'Even hai?',`${n} % 2 = 0 → remainder 0, matlab even. if wala block chalega.`,'ev');
+      n=n/2;H.push({v:n,op:'÷2'});
+      P(4,'Even → half',`n aadha hua: ${n*2} → ${n}. Reverse mein ye double ka undo hai, ek step mein aadha raasta.`,'ev');
+    }else{
+      P(3,'Even hai?',`${n} % 2 = 1 → remainder 1, matlab odd. if skip hoga.`,'od');
+      P(5,'else chala','Even nahi tha, isliye else wala block chalega.','od');
+      n=n-1;H.push({v:n,op:'−1'});
+      P(6,'Odd → minus one',`${n+1} → ${n}. Double se odd kabhi nahi banta, toh last step +1 tha. Uska undo hai minus one.`,'od');
+    }
+    c++;
+    P(8,'count++',`Ek operation pura hua. count = ${c}.`);
+    P(9,'Loop wapas','Closing } aaya, control while ke upar wapas gaya. Ab n phir check hoga.');
+  }
+  P(2,'Loop check',`n > 0 ?  ${n} > 0 → nahi. Loop khatam.`);
+  P(10,'return count',`Answer = ${c}. n se 0 tak ${c} operations lage.`,'done');
+  return S;
+}
+let S=[],i=0,timer=null,playing=true,pn=null,pc=null;
+function render(){
+  const s=S[i];
+  document.querySelectorAll(".ln").forEach((e,k)=>e.classList.toggle("on",k===s.l));
+  $("wh").textContent=s.h;$("wb").textContent=s.b;
+  const vn=$("vn"),vc=$("vc");
+  vn.textContent=s.n;vc.textContent=s.c===null?"-":s.c;
+  if(s.n!==pn){vn.classList.remove("pop");void vn.offsetWidth;vn.classList.add("pop")}
+  if(s.c!==pc){vc.classList.remove("pop");void vc.offsetWidth;vc.classList.add("pop")}
+  pn=s.n;pc=s.c;
+  $("co").classList.toggle("act",s.rule==="od");$("ce").classList.toggle("act",s.rule==="ev");
+  $("ch").innerHTML=s.H.map((h,k)=>(k?`<span class="op ${h.op==='÷2'?'ev':'od'}">${h.op}</span>`:'')+`<span class="nd${k===s.H.length-1?' cur new':''}">${h.v}</span>`).join('');
+  const done=s.rule==="done",a=$("an");a.classList.toggle("show",done);
+  if(done){$("at").textContent="Answer: "+s.c;
+    $("ap").textContent="Seedha raasta (0 se): "+s.H.map(h=>h.v).reverse().join(" → ")+(s.c?"":" (n = 0, koi step nahi)")}
+  $("pg").style.width=((i+1)/S.length*100)+"%";
+}
+function go(k){i=Math.max(0,Math.min(S.length-1,k));render();clearTimeout(timer);if(playing&&i<S.length-1)timer=setTimeout(()=>go(i+1),+$("sp").value)}
+function start(){let v=parseInt($("n").value,10);if(isNaN(v)||v<0)v=0;if(v>1023)v=1023;$("n").value=v;S=build(v);playing=true;$("pl").textContent="Pause";pn=pc=undefined;go(0)}
+$("rs").onclick=start;$("n").onchange=start;
+$("pl").onclick=()=>{playing=!playing;$("pl").textContent=playing?"Pause":"Play";clearTimeout(timer);if(playing&&i<S.length-1)timer=setTimeout(()=>go(i+1),+$("sp").value)};
+$("pv").onclick=()=>go(i-1);$("nx").onclick=()=>go(i+1);
+$("sp").onchange=()=>{clearTimeout(timer);if(playing&&i<S.length-1)timer=setTimeout(()=>go(i+1),+$("sp").value)};
+start();
+</script>
+</body>
+</html>
